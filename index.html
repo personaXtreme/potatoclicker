@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#7a4a20">
+  <title>🥔 Potato Clicker</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: radial-gradient(circle at top, #a86b32, #3b2110);
+      color: white;
+      text-align: center;
+      user-select: none;
+      overflow-x: hidden;
+    }
+
+    h1 {
+      margin: 25px 0 5px;
+      font-size: 36px;
+    }
+
+    .subtitle {
+      opacity: 0.8;
+      margin-bottom: 20px;
+    }
+
+    #potatoes {
+      font-size: 42px;
+      font-weight: bold;
+      margin: 15px;
+    }
+
+    #perSecond {
+      opacity: 0.8;
+      margin-bottom: 15px;
+    }
+
+    .potato {
+      width: 230px;
+      height: 230px;
+      border: none;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #c98b4b, #75401c);
+      box-shadow:
+        inset -15px -20px 30px rgba(0,0,0,.25),
+        0 12px 25px rgba(0,0,0,.4);
+      font-size: 110px;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform .08s;
+    }
+
+    .potato:active {
+      transform: scale(.92);
+    }
+
+    .shop {
+      width: 92%;
+      max-width: 500px;
+      margin: 30px auto;
+      padding: 20px;
+      background: rgba(0,0,0,.25);
+      border-radius: 20px;
+    }
+
+    .shop h2 {
+      margin-top: 0;
+    }
+
+    .upgrade {
+      width: 100%;
+      padding: 16px;
+      margin: 8px 0;
+      border: none;
+      border-radius: 14px;
+      background: #d99a55;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .upgrade:active {
+      transform: scale(.97);
+    }
+
+    .upgrade:disabled {
+      opacity: .45;
+    }
+
+    #reset {
+      margin: 10px;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 10px;
+      background: #512b17;
+      color: white;
+    }
+
+    .stats {
+      margin-top: 15px;
+      opacity: .9;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>🥔 Potato Clicker</h1>
+  <div class="subtitle">Clique na batata!</div>
+
+  <div id="potatoes">0 🥔</div>
+  <div id="perSecond">0 batatas por segundo</div>
+
+  <button class="potato" id="potato">🥔</button>
+
+  <div class="stats">
+    Potadas por clique: <span id="power">1</span>
+  </div>
+
+  <div class="shop">
+    <h2>🛒 Loja</h2>
+
+    <button class="upgrade" id="farm">
+      🌱 Fazenda — +1/s<br>
+      Custo: <span id="farmCost">25</span> 🥔
+    </button>
+
+    <button class="upgrade" id="strong">
+      💪 Clique forte — +1 por clique<br>
+      Custo: <span id="strongCost">50</span> 🥔
+    </button>
+
+    <button class="upgrade" id="factory">
+      🏭 Fábrica — +10/s<br>
+      Custo: <span id="factoryCost">500</span> 🥔
+    </button>
+  </div>
+
+  <button id="reset">🔄 Resetar jogo</button>
+
+  <script>
+    let potatoes = Number(localStorage.getItem("potatoes")) || 0;
+    let power = Number(localStorage.getItem("power")) || 1;
+    let perSecond = Number(localStorage.getItem("perSecond")) || 0;
+
+    let farmCost = Number(localStorage.getItem("farmCost")) || 25;
+    let strongCost = Number(localStorage.getItem("strongCost")) || 50;
+    let factoryCost = Number(localStorage.getItem("factoryCost")) || 500;
+
+    const potato = document.getElementById("potato");
+    const potatoesText = document.getElementById("potatoes");
+    const powerText = document.getElementById("power");
+    const perSecondText = document.getElementById("perSecond");
+
+    const farm = document.getElementById("farm");
+    const strong = document.getElementById("strong");
+    const factory = document.getElementById("factory");
+
+    function save() {
+      localStorage.setItem("potatoes", potatoes);
+      localStorage.setItem("power", power);
+      localStorage.setItem("perSecond", perSecond);
+
+      localStorage.setItem("farmCost", farmCost);
+      localStorage.setItem("strongCost", strongCost);
+      localStorage.setItem("factoryCost", factoryCost);
+    }
+
+    function update() {
+      potatoesText.textContent =
+        Math.floor(potatoes) + " 🥔";
+
+      powerText.textContent = power;
+
+      perSecondText.textContent =
+        perSecond + " batatas por segundo";
+
+      document.getElementById("farmCost").textContent = farmCost;
+      document.getElementById("strongCost").textContent = strongCost;
+      document.getElementById("factoryCost").textContent = factoryCost;
+
+      farm.disabled = potatoes < farmCost;
+      strong.disabled = potatoes < strongCost;
+      factory.disabled = potatoes < factoryCost;
+
+      save();
+    }
+
+    potato.addEventListener("click", () => {
+      potatoes += power;
+      update();
+    });
+
+    farm.addEventListener("click", () => {
+      if (potatoes >= farmCost) {
+        potatoes -= farmCost;
+        perSecond += 1;
+        farmCost = Math.floor(farmCost * 1.5);
+        update();
+      }
+    });
+
+    strong.addEventListener("click", () => {
+      if (potatoes >= strongCost) {
+        potatoes -= strongCost;
+        power += 1;
+        strongCost = Math.floor(strongCost * 1.6);
+        update();
+      }
+    });
+
+    factory.addEventListener("click", () => {
+      if (potatoes >= factoryCost) {
+        potatoes -= factoryCost;
+        perSecond += 10;
+        factoryCost = Math.floor(factoryCost * 1.7);
+        update();
+      }
+    });
+
+    document.getElementById("reset").addEventListener("click", () => {
+      potatoes = 0;
+      power = 1;
+      perSecond = 0;
+
+      farmCost = 25;
+      strongCost = 50;
+      factoryCost = 500;
+
+      save();
+      update();
+    });
+
+    setInterval(() => {
+      potatoes += perSecond;
+      update();
+    }, 1000);
+
+    update();
+  </script>
+
+</body>
+</html>
